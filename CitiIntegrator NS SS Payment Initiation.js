@@ -3853,6 +3853,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                     var wireType = context.request.parameters.custpage_wire_type;
                     var paramObj = {};
                     paramObj.wireType = wireType;
+                    var isInvalidContent = false;
+                    var htmlCheckReg = /<\/?[a-zA-Z][\s\S]*/i;
                     if (wireType == "INTERNAL_TRANSFERS") {
                         //Internal Transfer
                         var lineCountFrom = context.request.getLineCount('custpage_inter_transfer_from');
@@ -3883,6 +3885,7 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                         amountToBeSent = amountToBeSent.replace(/,/g, '');
                         var transferDate = context.request.parameters.custpage_inter_trans_date;
                         var transactionDescription = context.request.parameters.custpage_inter_trans_desp;
+                        if (htmlCheckReg.test(transactionDescription)) {isInvalidContent = true;} // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
                         //covert date into "DD/MM/YYYY"
                         var scheduledDate = formatDate(transferDate);
                         paramObj.accountNumberFrom = accountNumberFrom;
@@ -3913,20 +3916,20 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                         }
                         var beneficiaryName = context.request.parameters.custpage_dom_beneficiary_name;
                         var beneficiaryAccountNumber = context.request.parameters.custpage_dom_account_number;
-                        var phoneNumber = context.request.parameters.custpage_dom_phone_number;
-                        var address1 = context.request.parameters.custpage_dom_address_one;
-                        var address2 = context.request.parameters.custpage_dom_address_two;
-                        var address3 = context.request.parameters.custpage_dom_city;
-                        var specialInstructions1 = context.request.parameters.custpage_dom_spec_instr_one;
-                        var specialInstructions2 = context.request.parameters.custpage_dom_spec_instr_two;
-                        var specialInstructions3 = context.request.parameters.custpage_dom_spec_instr_three;
+                        var phoneNumber = context.request.parameters.custpage_dom_phone_number; //
+                        var address1 = context.request.parameters.custpage_dom_address_one; // 
+                        var address2 = context.request.parameters.custpage_dom_address_two;//
+                        var address3 = context.request.parameters.custpage_dom_city; //
+                        var specialInstructions1 = context.request.parameters.custpage_dom_spec_instr_one; //
+                        var specialInstructions2 = context.request.parameters.custpage_dom_spec_instr_two; //
+                        var specialInstructions3 = context.request.parameters.custpage_dom_spec_instr_three; //
                         var wireDate = context.request.parameters.custpage_dom_wire_date;
                         var wireAmount = context.request.parameters.custpage_dom_wire_amount;
                         // CR: remove comma  
                         wireAmount = wireAmount.replace(/,/g, '');
-                        var customerReferenceNumber = context.request.parameters.custpage_dom_cust_refer_number;
-                        var customerAdditionalReference = context.request.parameters.custpage_dom_add_refers;
-                        var customerAdditionalDescription = context.request.parameters.custpage_dom_add_description;
+                        var customerReferenceNumber = context.request.parameters.custpage_dom_cust_refer_number; //
+                        var customerAdditionalReference = context.request.parameters.custpage_dom_add_refers; // 
+                        var customerAdditionalDescription = context.request.parameters.custpage_dom_add_description; //
                         //covert date into "DD/MM/YYYY"
                         var scheduledDate = formatDate(wireDate);
                         paramObj.accountNumberFrom = accountNumberFrom;
@@ -3963,7 +3966,7 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                             var financialInstitutionAccount = context.request.parameters.custpage_finint_account;
                             var city = context.request.parameters.custpage_city;
                             var state = context.request.parameters.custpage_state;
-                            var bankAddress = context.request.parameters.custpage_bank_address;
+                            var bankAddress = context.request.parameters.custpage_bank_address; // 
                             var hiddenBankAddress = context.request.parameters.custpage_dom_aba_number_details_hidden;
                             var displayBankAddress = "<p id='custpage_bank_routing_info'>" + hiddenBankAddress + "<p>";
                             paramObj.displayBankAddress = displayBankAddress;
@@ -3995,6 +3998,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                             paramObj.destBankState = destBankState;
                             paramObj.ofiIndicator = "N";
                         }
+
+                        if(htmlCheckReg.test(beneficiaryName) || htmlCheckReg.test(phoneNumber) || htmlCheckReg.test(address1) || htmlCheckReg.test(address2)|| htmlCheckReg.test(address3) || htmlCheckReg.test(specialInstructions1) || htmlCheckReg.test(specialInstructions2) || htmlCheckReg.test(specialInstructions3) || htmlCheckReg.test(customerReferenceNumber)|| htmlCheckReg.test(customerAdditionalReference) || htmlCheckReg.test(customerAdditionalDescription) || htmlCheckReg.test(custpage_bank_address)) {isInvalidContent = true;} // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
                     }
                     else if (wireType == "REAL_TIME_PAYMENTS") { //rutuja start
                         //Domestic Wire
@@ -4109,9 +4114,9 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                             }
                         }
                         var destinationCountry = context.request.parameters.custpage_for_dest_country;
-                        var destBankCity = context.request.parameters.custpage_for_bank_city;
-                        var destBankAddr = context.request.parameters.custpage_for_bank_address;
-                        var destBankName = context.request.parameters.custpage_for_bank_name;
+                        var destBankCity = context.request.parameters.custpage_for_bank_city; // 
+                        var destBankAddr = context.request.parameters.custpage_for_bank_address; //
+                        var destBankName = context.request.parameters.custpage_for_bank_name; //
                         var swiftOrBIC = context.request.parameters.custpage_for_swift_or_bic;
                         var currency = context.request.parameters.custpage_for_currency;
                         var chipOrUID = context.request.parameters.custpage_for_chip_or_uid;
@@ -4124,17 +4129,17 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                         var wireAmount = context.request.parameters.custpage_for_wire_amount;
                         // CR: remove comma  
                         wireAmount = wireAmount.replace(/,/g, '');
-                        var beneficiaryName = context.request.parameters.custpage_for_beneficiary_name;
+                        var beneficiaryName = context.request.parameters.custpage_for_beneficiary_name; //
                         var beneficiaryAccountNumber = context.request.parameters.custpage_for_account_number;
-                        var phoneNumber = context.request.parameters.custpage_for_phone_number;
-                        var address1 = context.request.parameters.custpage_for_address_one;
-                        var address2 = context.request.parameters.custpage_for_address_two;
-                        var address3 = context.request.parameters.custpage_for_city;
-                        var specialInstructions1 = context.request.parameters.custpage_for_spec_instr_one;
-                        var specialInstructions2 = context.request.parameters.custpage_for_spec_instr_two;
-                        var specialInstructions3 = context.request.parameters.custpage_for_spec_instr_three;
-                        var customerReferenceNumber = context.request.parameters.custpage_for_cust_refer_number;
-                        var customerAdditionalReference = context.request.parameters.custpage_for_add_refers;
+                        var phoneNumber = context.request.parameters.custpage_for_phone_number; //
+                        var address1 = context.request.parameters.custpage_for_address_one; //
+                        var address2 = context.request.parameters.custpage_for_address_two; //
+                        var address3 = context.request.parameters.custpage_for_city; //
+                        var specialInstructions1 = context.request.parameters.custpage_for_spec_instr_one; //
+                        var specialInstructions2 = context.request.parameters.custpage_for_spec_instr_two; //
+                        var specialInstructions3 = context.request.parameters.custpage_for_spec_instr_three; //
+                        var customerReferenceNumber = context.request.parameters.custpage_for_cust_refer_number; //
+                        var customerAdditionalReference = context.request.parameters.custpage_for_add_refers; //
                         var purposeCode = context.request.parameters.custpage_for_purpose_code;
                         var subPurpCode = context.request.parameters.custpage_for_sub_purpose_code;
                         var bankAddress = context.request.parameters.custpage_for_bank_details_hidden;
@@ -4177,6 +4182,55 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                         paramObj.routingCodeType = "BIC";
                         paramObj.otherRoutingCode = otherRoutingCode;
                         paramObj.otherRoutingCodeLabel = otherRoutingCodeLabel;
+
+                        if(htmlCheckReg.test(destBankCity) || htmlCheckReg.test(destBankAddr) || htmlCheckReg.test(destBankName) || htmlCheckReg.test(beneficiaryName) || htmlCheckReg.test(phoneNumber) || htmlCheckReg.test(address1) || htmlCheckReg.test(address2) || htmlCheckReg.test(address3) || htmlCheckReg.test(specialInstructions1) || htmlCheckReg.test(specialInstructions2) || htmlCheckReg.test(specialInstructions3) || htmlCheckReg.test(customerReferenceNumber) || htmlCheckReg.test(customerAdditionalReference)) {isInvalidContent = true;}// Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
+                    }
+                    log.debug('Invalid Content Detected', isInvalidContent);
+                    if(isInvalidContent) {
+                        var tokensSearchObj = customModule.getUserSession(userId);
+                        var tokensSearchObj = tokensSearchObj.run();
+                        var sessionResult = tokensSearchObj.getRange({
+                            start: 0,
+                            end: 1
+                        });
+                        var sessionuserId = sessionResult[0].id;
+                        var form = serverWidget.createForm({
+                            title: "Account Summary",
+                        });
+                        form.clientScriptModulePath = "../Client/CitiIntegrator NS CS Informtn Validation.js";
+                        var fileObj = file.load({
+                            id: '../Client/CitiIntegrator NS CS Informtn Validation.js'
+                        });
+                        var filePath = fileObj.path;
+
+                        var businessCodeFlag = form.addField({
+                            id: 'custpage_overlap_titel1',
+                            type: serverWidget.FieldType.INLINEHTML,
+                            label: "Business Code1"
+                        });
+                        // Vishal Code change for Report and Submit Home Button.
+                        var businessCodeEnc = busiCode.substring(busiCode.length - 4, busiCode.length);
+                        businessCodeFlag.defaultValue = '<div style="font-weight:bold"><script> function home() { debugger; var rConfig = JSON.parse(\'{}\') ;rConfig[\'context\'] = \'/\' + "' + filePath + '";var entryPointRequire = require.config(rConfig); entryPointRequire([\'/\' + "' + filePath + '"], function(custommodule){custommodule.home();}) }; function logOut() { var rConfig = JSON.parse(\'{}\') ;rConfig[\'context\'] = \'/\' + "' + filePath + '";var entryPointRequire = require.config(rConfig); entryPointRequire([\'/\' + "' + filePath + '"], function(custommodule){custommodule.switchUser(' + sessionuserId + ');}) }; var container = jQuery(".uir-page-title"); var newDiv = jQuery("<div><a style=\'background-color: #e4e4e4; position: absolute; right: 0; top:25px; font-weight: 600; padding-block: 1px; padding-inline: 6px; border: solid rgb(201, 201, 201) 1px; padding: 4px 8px; height: 18px !important; box-sizing: content-box; border-radius: 30px; color: rgb(48, 48, 48); cursor: pointer; font-size: 13px !important;\' onclick=\'logOut()\'>Log Out</a></div>"); container.prepend(newDiv); var newDiv1 = jQuery("<div><a id= \'homeButton\' style=\'background-color: #e4e4e4; position: absolute; right: 80px; top:26px; font-weight: 600; padding-block: 1px; padding-inline: 6px; border: solid rgb(201, 201, 201) 1px; padding: 4px 8px; height: 18px !important; box-sizing: content-box; border-radius: 30px; color: rgb(48, 48, 48); cursor: pointer; font-size: 13px !important;\' onclick=\'home()\'>Accounts Dashboard</a></div>"); container.prepend(newDiv1);</script></div>';
+
+                        var html = form.addField({
+                            id: "custpage_error_message1",
+                            type: serverWidget.FieldType.INLINEHTML,
+                            label: "Message 1"
+                        });
+
+                        var errorIcon = file.load({
+                            id: '../Images/error-icon.png'
+                        });
+                        var errorIconPath = errorIcon.url;
+
+                        var htmlTags = "";
+                        htmlTags += "<span>"
+                        htmlTags += "<img style='height: 75px;margin-top: 5%;margin-left: 47%;' src=" + errorIconPath + "></img>"
+                        htmlTags += "</span>"
+                        htmlTags += "<p style='font-size: 20px; text-align: center; margin-top: 20px; font-weight: bold'>There are invalid field values submitted</p>"
+                        html.defaultValue = htmlTags;
+                        res.writePage(form);
+                        return false;
                     }
                     var newDate = new Date();
                     var dateString = newDate.toISOString();
