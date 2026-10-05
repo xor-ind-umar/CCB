@@ -4185,6 +4185,7 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
 
                         if(htmlCheckReg.test(destBankCity) || htmlCheckReg.test(destBankAddr) || htmlCheckReg.test(destBankName) || htmlCheckReg.test(beneficiaryName) || htmlCheckReg.test(phoneNumber) || htmlCheckReg.test(address1) || htmlCheckReg.test(address2) || htmlCheckReg.test(address3) || htmlCheckReg.test(specialInstructions1) || htmlCheckReg.test(specialInstructions2) || htmlCheckReg.test(specialInstructions3) || htmlCheckReg.test(customerReferenceNumber) || htmlCheckReg.test(customerAdditionalReference)) {isInvalidContent = true;}// Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
                     }
+                    //START - Umar has update for handling invalid content scenario (VA H3 Case 1)
                     log.debug('Invalid Content Detected', isInvalidContent);
                     if(isInvalidContent) {
                         var tokensSearchObj = customModule.getUserSession(userId);
@@ -4194,12 +4195,15 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                             end: 1
                         });
                         var sessionuserId = sessionResult[0].id;
+                      //  savePushLogs(sessionuserId, "", "CitiIntegrator NS SS Payment Initiation", "", "", exception);
+
                         var form = serverWidget.createForm({
-                            title: "Account Summary",
+                            title: "Payment Initiation : " + title
                         });
-                        form.clientScriptModulePath = "../Client/CitiIntegrator NS CS Informtn Validation.js";
+                        form.clientScriptModulePath = "../Client/CitiIntegrator NS CS Payment Initiation.js";
+
                         var fileObj = file.load({
-                            id: '../Client/CitiIntegrator NS CS Informtn Validation.js'
+                            id: '../Client/CitiIntegrator NS CS Payment Initiation.js'
                         });
                         var filePath = fileObj.path;
 
@@ -4222,7 +4226,6 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                             id: '../Images/error-icon.png'
                         });
                         var errorIconPath = errorIcon.url;
-
                         var htmlTags = "";
                         htmlTags += "<span>"
                         htmlTags += "<img style='height: 75px;margin-top: 5%;margin-left: 47%;' src=" + errorIconPath + "></img>"
@@ -4232,6 +4235,7 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                         res.writePage(form);
                         return false;
                     }
+                    //END - Umar has update for handling invalid content scenario (VA H3 Case 1)
                     var newDate = new Date();
                     var dateString = newDate.toISOString();
                     var folderSearchObj = search.create({
