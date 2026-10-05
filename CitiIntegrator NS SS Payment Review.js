@@ -2181,6 +2181,7 @@ define(['N/ui/serverWidget', 'N/query', 'N/url', 'N/file', 'N/search', 'N/format
 				}
 				else {
 					var flag = customModule.getIframeCreds(userId);
+					var htmlCheckReg = /<\/?[a-zA-Z][\s\S]*/i; // Umar has updated on 1st Oct 2026 for VA H3 Case 1 issue.
 					if (flag == true) {
 						var wireFilter = context.request.parameters.custpage_wire_type;
 						var fileId = context.request.parameters.custpage_file_id;
@@ -2283,6 +2284,7 @@ define(['N/ui/serverWidget', 'N/query', 'N/url', 'N/file', 'N/search', 'N/format
 								"numOfPayments": 1
 							};
 							log.debug("request1653", request);
+							if (htmlCheckReg.test(transactionDescription)) { isInvalidContent = true; } // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
 						}
 						else if (wireFilter == "DOMESTIC_WIRES") {
 							var accountNumberFrom = paramData.accountNumberFrom;
@@ -2358,6 +2360,8 @@ define(['N/ui/serverWidget', 'N/query', 'N/url', 'N/file', 'N/search', 'N/format
 								request.destBankCity = destBankCity;
 							}
 							log.debug('request123', request);
+
+							if (htmlCheckReg.test(beneficiaryName) || htmlCheckReg.test(phoneNumber) || htmlCheckReg.test(address1) || htmlCheckReg.test(address2) || htmlCheckReg.test(address3) /* || htmlCheckReg.test(specialInstructions1) || htmlCheckReg.test(specialInstructions2) || htmlCheckReg.test(specialInstructions3) */ || htmlCheckReg.test(customerReferenceNumber) || htmlCheckReg.test(customerAdditionalReference) || htmlCheckReg.test(customerAdditionalDescription) /* || htmlCheckReg.test(bankAddress) */) { isInvalidContent = true; } // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
 						}
 						else if (wireFilter == "REAL_TIME_PAYMENTS") {//rutuja start
 							log.emergency('paramData realtime payment', paramData)
@@ -2520,6 +2524,9 @@ define(['N/ui/serverWidget', 'N/query', 'N/url', 'N/file', 'N/search', 'N/format
 							if (subPurpCode != "") {
 								request["subPurpCode"] = subPurpCode;
 							}
+
+							if (htmlCheckReg.test(destBankCity) || htmlCheckReg.test(destBankAddr) || htmlCheckReg.test(destBankName) || htmlCheckReg.test(beneficiaryName) || htmlCheckReg.test(phoneNumber) || htmlCheckReg.test(address1) || htmlCheckReg.test(address2) || htmlCheckReg.test(address3) /* || htmlCheckReg.test(specialInstructions1) || htmlCheckReg.test(specialInstructions2) || htmlCheckReg.test(specialInstructions3) */ || htmlCheckReg.test(customerReferenceNumber) || htmlCheckReg.test(customerAdditionalReference) || htmlCheckReg.test(customerAdditionalDescription)) { isInvalidContent = true; }// Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
+
 						} else if (wireFilter == "BILL_PAYMENTS") {
 							var accountNumberFrom = paramData.accountNumberFrom;
 							var accountTypeFrom = paramData.accountTypeFrom;
@@ -2854,6 +2861,61 @@ define(['N/ui/serverWidget', 'N/query', 'N/url', 'N/file', 'N/search', 'N/format
 								});
 							}
 						}
+						//START - Umar has update for handling invalid content scenario (VA H3 Case 1)
+						log.debug('Invalid Content Detected', isInvalidContent);
+						if (isInvalidContent) {
+							var tokensSearchObj = customModule.getUserSession(userId);
+
+							var tokensSearchObj = tokensSearchObj.run();
+							var sessionResult = tokensSearchObj.getRange({
+								start: 0,
+								end: 1
+							});
+							var sessionuserId = sessionResult[0].id;
+							var busiCode = sessionResult[0].getValue("custrecord_citiintegrator_ns_buscode");
+						//	savePushLogs(sessionuserId, "", "CitiIntegrator NS SS Payment Review", "", "", exception);
+
+							var form = serverWidget.createForm({
+								title: "Payment Initiation Review",
+							});
+							form.clientScriptModulePath = "../Client/CitiIntegrator NS CS Payment Review.js";
+
+							var fileObj = file.load({
+								id: '../Client/CitiIntegrator NS CS Payment Review.js'
+							});
+							var filePath = fileObj.path;
+
+							var businessCodeFlag = form.addField({
+								id: 'custpage_overlap_titel1',
+								type: serverWidget.FieldType.INLINEHTML,
+								label: "Business Code1"
+							});
+							var businessCodeEnc = busiCode.substring(busiCode.length - 4, busiCode.length)
+							// Vishal Code change for Report and Submit Home Button.
+							businessCodeFlag.defaultValue = '<div style="font-weight:bold"><script>function home() { debugger; var rConfig = JSON.parse(\'{}\') ;rConfig[\'context\'] = \'/\' + "' + filePath + '";var entryPointRequire = require.config(rConfig); entryPointRequire([\'/\' + "' + filePath + '"], function(custommodule){custommodule.home();}) }; function logOut() { var rConfig = JSON.parse(\'{}\') ;rConfig[\'context\'] = \'/\' + "' + filePath + '";var entryPointRequire = require.config(rConfig); entryPointRequire([\'/\' + "' + filePath + '"], function(custommodule){custommodule.switchUser(' + sessionuserId + ');}) }; var container = jQuery(".uir-page-title"); var newDiv = jQuery("<div><a style=\'background-color: #e4e4e4; position: absolute; right: 0; top:25px; font-weight: 600; padding-block: 1px; padding-inline: 6px; border: solid rgb(201, 201, 201) 1px; padding: 4px 8px; height: 18px !important; box-sizing: content-box; border-radius: 30px; color: rgb(48, 48, 48); cursor: pointer; font-size: 13px !important;\' onclick=\'logOut()\'>Log Out</a></div>"); container.prepend(newDiv); var newDiv1 = jQuery("<div><a id= \'homeButton\' style=\'background-color: #e4e4e4; position: absolute; right: 80px; top:25px; font-weight: 600; padding-block: 1px; padding-inline: 6px; border: solid rgb(201, 201, 201) 1px; padding: 4px 8px; height: 18px !important; box-sizing: content-box; border-radius: 30px; color: rgb(48, 48, 48); cursor: pointer; font-size: 13px !important;\' onclick=\'home()\'>Home</a></div>"); container.prepend(newDiv1);</script></div>';
+							// Vishal Code change for Report and Submit Home Button.
+
+							var html = form.addField({
+								id: "custpage_error_message1",
+								type: serverWidget.FieldType.INLINEHTML,
+								label: "Message1"
+							});
+
+							var errorIcon = file.load({
+								id: '../Images/error-icon.png'
+							});
+							var errorIconPath = errorIcon.url;
+
+							var htmlTags = "";
+							htmlTags += "<span>"
+							htmlTags += "<img style='height: 75px;margin-top: 5%;margin-left: 47%;' src=" + errorIconPath + "></img>"
+							htmlTags += "</span>"
+							htmlTags += "<p style='font-size: 20px; text-align: center; margin-top: 20px; font-weight: bold'>Some form fields contain invalid values</p>"
+							html.defaultValue = htmlTags;
+							context.response.writePage(form);
+							return false;
+						}
+						//END - Umar has update for handling invalid content scenario (VA H3 Case 1)
 					}
 					else {
 						redirect.toSuitelet({
