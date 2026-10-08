@@ -3853,8 +3853,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                     var wireType = context.request.parameters.custpage_wire_type;
                     var paramObj = {};
                     paramObj.wireType = wireType;
-                    var isInvalidContent = false;
-                    var htmlCheckReg = /<\/?[a-zA-Z][\s\S]*/i;
+                    var isInvalidContent = false; // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
+                    var htmlCheckReg = /<\/?[a-zA-Z][\s\S]*/i; // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
                     if (wireType == "INTERNAL_TRANSFERS") {
                         //Internal Transfer
                         var lineCountFrom = context.request.getLineCount('custpage_inter_transfer_from');
@@ -3900,8 +3900,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                         paramObj.transferDate = transferDate;
                         paramObj.scheduledDate = scheduledDate;
                         paramObj.transactionDescription = transactionDescription;
-                    }
-                    else if (wireType == "DOMESTIC_WIRES") {
+                        if (htmlCheckReg.test(transactionDescription)) {isInvalidContent = true;} // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
+                    } else if (wireType == "DOMESTIC_WIRES") {
                         //Domestic Wire
                         var lineCountFrom = context.request.getLineCount('custpage_dom_transfer_from');
                         var accountNumberFrom, encyAccountNumberFrom, accountTypeFrom, currentAvailabeFrom;
@@ -3998,8 +3998,9 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                             paramObj.destBankState = destBankState;
                             paramObj.ofiIndicator = "N";
                         }
-
-                        if(htmlCheckReg.test(beneficiaryName) || htmlCheckReg.test(phoneNumber) || htmlCheckReg.test(address1) || htmlCheckReg.test(address2)|| htmlCheckReg.test(address3) || htmlCheckReg.test(specialInstructions1) || htmlCheckReg.test(specialInstructions2) || htmlCheckReg.test(specialInstructions3) || htmlCheckReg.test(customerReferenceNumber)|| htmlCheckReg.test(customerAdditionalReference) || htmlCheckReg.test(customerAdditionalDescription) || htmlCheckReg.test(custpage_bank_address)) {isInvalidContent = true;} // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
+                        log.debug('Beneficiary and Bank Address Validation', beneficiaryName + ', ' + phoneNumber + ', ' + address1 + ', ' + address2 + ', ' + address3 + ', ' + specialInstructions1 + ', ' + specialInstructions2 + ', ' + specialInstructions3 + ', ' + customerReferenceNumber + ', ' + customerAdditionalReference + ', ' + customerAdditionalDescription + ', ' + bankAddress);
+                        
+                        if(htmlCheckReg.test(beneficiaryName) || htmlCheckReg.test(phoneNumber) || htmlCheckReg.test(address1) || htmlCheckReg.test(address2)|| htmlCheckReg.test(address3) || htmlCheckReg.test(specialInstructions1) || htmlCheckReg.test(specialInstructions2) || htmlCheckReg.test(specialInstructions3) || htmlCheckReg.test(customerReferenceNumber)|| htmlCheckReg.test(customerAdditionalReference) || htmlCheckReg.test(customerAdditionalDescription) /* || htmlCheckReg.test(bankAddress) */) {isInvalidContent = true;} // Umar has updated for VA H3 Case 1 issue on 1st Oct 2026.
                     }
                     else if (wireType == "REAL_TIME_PAYMENTS") { //rutuja start
                         //Domestic Wire
@@ -4195,10 +4196,11 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                             end: 1
                         });
                         var sessionuserId = sessionResult[0].id;
-                      //  savePushLogs(sessionuserId, "", "CitiIntegrator NS SS Payment Initiation", "", "", exception);
+                       //  savePushLogs(sessionuserId, "", "CitiIntegrator NS SS Payment Initiation", "", "", exception);
+                       var busiCode = sessionResult[0].getValue("custrecord_citiintegrator_ns_buscode");
 
                         var form = serverWidget.createForm({
-                            title: "Payment Initiation : " + title
+                            title: "Payment Initiation : " + wireType
                         });
                         form.clientScriptModulePath = "../Client/CitiIntegrator NS CS Payment Initiation.js";
 
@@ -4230,9 +4232,9 @@ define(['N/ui/serverWidget', 'N/record', 'N/file', 'N/format', 'N/config', 'N/ht
                         htmlTags += "<span>"
                         htmlTags += "<img style='height: 75px;margin-top: 5%;margin-left: 47%;' src=" + errorIconPath + "></img>"
                         htmlTags += "</span>"
-                        htmlTags += "<p style='font-size: 20px; text-align: center; margin-top: 20px; font-weight: bold'>There are invalid field values submitted</p>"
+                        htmlTags += "<p style='font-size: 20px; text-align: center; margin-top: 20px; font-weight: bold'>Some form fields contain invalid data</p>"
                         html.defaultValue = htmlTags;
-                        res.writePage(form);
+                        context.response.writePage(form);
                         return false;
                     }
                     //END - Umar has update for handling invalid content scenario (VA H3 Case 1)
